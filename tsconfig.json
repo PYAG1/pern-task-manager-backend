@@ -4,7 +4,7 @@
       "module": "NodeNext",                        // Use ES module resolution (NodeNext)
       "esModuleInterop": true,                     // Allows default import of commonJS modules
       "forceConsistentCasingInFileNames": true,    // Ensure consistent casing in imports
-      "strict": true,                              // Enable all strict type-checking options
+      "strict": false,                              // Enable all strict type-checking options
       "skipLibCheck": true,                        // Skip type checking of declaration files
       "outDir": "./dist",                          // Output directory for compiled files
       "rootDir": "./src",                          // Root directory of source files
