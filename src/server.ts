@@ -4,12 +4,12 @@ import cors from "cors"
 import userAuthRouter from "./routes/auth/a"
 import dotenv from "dotenv"
 import bodyParser from "body-parser"
-import { hashPassword } from "./services/encryption.service"
+import { corsOptions } from "./config/corsOption"
 const app = express()
-const port = 3000
+const port = 8080
 dotenv.config();
 app.use(express.json(), bodyParser.json());
-app.use(cors())
+app.use(cors(corsOptions))
 
 app.all("/", (req: Request, res: Response) => {
   res.send({
