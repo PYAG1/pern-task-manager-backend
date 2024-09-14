@@ -13,10 +13,10 @@ const devConfig = {
 };
 
 const prodConfig = {
-  user: process.env.DB_USER,
+  user: process.env.USER,
   password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'), // Ensure port is a number
+  host: process.env.HOST,
+  port: parseInt(process.env.PORT),
   database: process.env.DB_NAME,
 
 };

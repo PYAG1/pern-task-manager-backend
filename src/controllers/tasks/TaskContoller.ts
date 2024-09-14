@@ -129,3 +129,41 @@ export const getSingleTask = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const getAllTasksByDate = async (req: Request, res: Response) => {
+  try {
+    const { start_date, end_date } = req.query;
+
+    // Base query to get all tasks
+    let query = "SELECT * FROM tasks";
+    const values: any[] = [];
+
+
+    if (start_date && end_date) {
+      query += " WHERE created_at >= $1 AND created_at <= $2";
+      values.push(start_date, end_date);
+    } else if (start_date) {
+      query += " WHERE created_at >= $1";
+      values.push(start_date);
+    } else if (end_date) {
+      query += " WHERE created_at <= $1";
+      values.push(end_date);
+    }
+
+    const getTasksQuery = await pool.query(query, values);
+
+    return res.status(200).json({
+      status: true,
+      message: "Tasks retrieved successfully",
+      data: getTasksQuery.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving tasks",
+    });
+  }
+};
+
