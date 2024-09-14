@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import { tokenPayload } from "../types/@types"
-
-
+import dotenv from "dotenv"
+dotenv.config()
 
 export async function createToken (payload: tokenPayload){
     try {

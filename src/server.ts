@@ -2,6 +2,7 @@
 import express, { NextFunction ,Request,Response} from "express"
 import cors from "cors"
 import userAuthRouter from "./routes/auth/a"
+import taskRouter from "./routes/tasks/tasks.js"
 import dotenv from "dotenv"
 import bodyParser from "body-parser"
 import { corsOptions } from "./config/corsOption"
@@ -18,6 +19,7 @@ app.all("/", (req: Request, res: Response) => {
   });
 });
 app.use("/api",userAuthRouter)
+app.use("/api",taskRouter)
 
 
 app.listen(port, () => {
