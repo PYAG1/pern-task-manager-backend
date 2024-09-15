@@ -13,4 +13,6 @@ router.route("/tasks")
 router.route("/tasks/:task_id")
     .get(verifyjwt_1.verifyJWT, TaskContoller_1.getSingleTask)
     .delete(verifyjwt_1.verifyJWT, TaskContoller_1.deleteTask);
+router.route("/taskbyDate")
+    .get(verifyjwt_1.verifyJWT, TaskContoller_1.getAllTasksByDate);
 exports.default = router;

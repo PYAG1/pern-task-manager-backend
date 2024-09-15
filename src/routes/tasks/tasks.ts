@@ -1,6 +1,6 @@
 import  express, { Router }  from "express"
 import { verifyJWT } from "../../middleware/verifyjwt"
-import { createTask, deleteTask, getAllTasks, getSingleTask } from "../../controllers/tasks/TaskContoller"
+import { createTask, deleteTask, getAllTasks, getAllTasksByDate, getSingleTask } from "../../controllers/tasks/TaskContoller"
 const router:Router= express.Router()
 
 router.route("/tasks")
@@ -11,5 +11,8 @@ router.route("/tasks")
 router.route("/tasks/:task_id")
 .get(verifyJWT,getSingleTask)
 .delete(verifyJWT,deleteTask)
+
+router.route("/taskbyDate")
+.get(verifyJWT,getAllTasksByDate)
 
 export default router

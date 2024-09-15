@@ -2,23 +2,26 @@ import { Response, Request } from "express";
 import { HttpStatus, Irequest } from "../../types/@types";
 import { pool } from "../../config/db";
 
+
 export async function createTask(req: Irequest, res: Response) {
   try {
-    const { title, due_date, description, time, priority } = req.body;
+    const { title, due_date, description = '', time = '', priority = 'low' } = req.body; 
 
     if (!title || !due_date) {
-      return res.status(HttpStatus.BAD_REQUEST).send({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         status: false,
-        message: "Please provide a title and due date",
+        message: "Title and due date are required",
       });
     }
 
     const createTaskQuery = `
-            INSERT INTO tasks (title, description, due_date, time, priority, user_id)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *;
-        `;
-    const createTask = await pool.query(createTaskQuery, [
+      INSERT INTO tasks (title, description, due_date, time, priority, user_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
+
+  
+    const { rows } = await pool.query(createTaskQuery, [
       title,
       description,
       due_date,
@@ -27,16 +30,20 @@ export async function createTask(req: Irequest, res: Response) {
       req.user_id,
     ]);
 
-    return res.status(HttpStatus.CREATED).send({
+   
+    return res.status(HttpStatus.CREATED).json({
       status: true,
       message: "Task created successfully",
-      data: createTask.rows[0],
+      data: rows[0],
     });
   } catch (error) {
-    console.error("Error creating task:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+    console.error("Error creating task:", error.message);
+
+   
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       status: false,
       message: "An error occurred while creating the task",
+      error: error.message,
     });
   }
 }
@@ -131,25 +138,25 @@ export const getSingleTask = async (req: Request, res: Response) => {
 };
 
 
+
 export const getAllTasksByDate = async (req: Request, res: Response) => {
   try {
-    const { start_date, end_date } = req.query;
+    const { created_at } = req.query;
 
-    // Base query to get all tasks
+    
     let query = "SELECT * FROM tasks";
     const values: any[] = [];
 
+    if (created_at) {
+ 
+      const createdDate = created_at.toString().trim();
 
-    if (start_date && end_date) {
-      query += " WHERE created_at >= $1 AND created_at <= $2";
-      values.push(start_date, end_date);
-    } else if (start_date) {
-      query += " WHERE created_at >= $1";
-      values.push(start_date);
-    } else if (end_date) {
-      query += " WHERE created_at <= $1";
-      values.push(end_date);
+      if (createdDate) {
+        query += " WHERE created_at::date = $1";
+        values.push(createdDate);
+      }
     }
+
 
     const getTasksQuery = await pool.query(query, values);
 

@@ -1,25 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSingleTask = exports.deleteTask = void 0;
+exports.getAllTasksByDate = exports.getSingleTask = exports.deleteTask = void 0;
 exports.createTask = createTask;
 exports.getAllTasks = getAllTasks;
 const _types_1 = require("../../types/@types");
 const db_1 = require("../../config/db");
 async function createTask(req, res) {
     try {
-        const { title, due_date, description, time, priority } = req.body;
+        const { title, due_date, description = '', time = '', priority = 'low' } = req.body;
         if (!title || !due_date) {
-            return res.status(_types_1.HttpStatus.BAD_REQUEST).send({
+            return res.status(_types_1.HttpStatus.BAD_REQUEST).json({
                 status: false,
-                message: "Please provide a title and due date",
+                message: "Title and due date are required",
             });
         }
         const createTaskQuery = `
-            INSERT INTO tasks (title, description, due_date, time, priority, user_id)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *;
-        `;
-        const createTask = await db_1.pool.query(createTaskQuery, [
+      INSERT INTO tasks (title, description, due_date, time, priority, user_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
+        const { rows } = await db_1.pool.query(createTaskQuery, [
             title,
             description,
             due_date,
@@ -27,17 +27,18 @@ async function createTask(req, res) {
             priority,
             req.user_id,
         ]);
-        return res.status(_types_1.HttpStatus.CREATED).send({
+        return res.status(_types_1.HttpStatus.CREATED).json({
             status: true,
             message: "Task created successfully",
-            data: createTask.rows[0],
+            data: rows[0],
         });
     }
     catch (error) {
-        console.error("Error creating task:", error);
-        return res.status(_types_1.HttpStatus.INTERNAL_SERVER_ERROR).send({
+        console.error("Error creating task:", error.message);
+        return res.status(_types_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
             status: false,
             message: "An error occurred while creating the task",
+            error: error.message,
         });
     }
 }
@@ -113,3 +114,31 @@ const getSingleTask = async (req, res) => {
     }
 };
 exports.getSingleTask = getSingleTask;
+const getAllTasksByDate = async (req, res) => {
+    try {
+        const { created_at } = req.query;
+        let query = "SELECT * FROM tasks";
+        const values = [];
+        if (created_at) {
+            const createdDate = created_at.toString().trim();
+            if (createdDate) {
+                query += " WHERE created_at::date = $1";
+                values.push(createdDate);
+            }
+        }
+        const getTasksQuery = await db_1.pool.query(query, values);
+        return res.status(200).json({
+            status: true,
+            message: "Tasks retrieved successfully",
+            data: getTasksQuery.rows,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching tasks:", error);
+        return res.status(500).json({
+            status: false,
+            message: "An error occurred while retrieving tasks",
+        });
+    }
+};
+exports.getAllTasksByDate = getAllTasksByDate;
